@@ -1,4 +1,4 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SuperHeroApi.Entities;
 
@@ -8,20 +8,29 @@ namespace SuperHeroApi.Controllers
     [ApiController]
     public class SuperHerosController : ControllerBase
     {
-        [HttpGet]
-        public ActionResult<List<SuperHero>> GetAllHeroes()
+        private readonly DataContext _dataContext;
+
+        public SuperHerosController(DataContext dataContext)
         {
-            var heroes = new List<SuperHero>
-            {
-                new() {
-                    Id = 1,
-                    Name = "Spiderman",
-                    FirstName = "Peter",
-                    LastName = "Parker",
-                    Place = "New York City"
-                }
-            };
+            _dataContext = dataContext;
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> GetAllHeroes()
+        {
+            var heroes = await _dataContext.SuperHeroes.ToListAsync();
             return Ok(heroes);
+        }
+
+        [HttpGet("{id}")]
+        public async Task<IActionResult> GetHero(int id)
+        {
+            var hero = await _dataContext.SuperHeroes.FindAsync(id);
+            if(hero is null)
+            {
+                return BadRequest();
+            }
+            return Ok(hero);
         }
     }
 }
