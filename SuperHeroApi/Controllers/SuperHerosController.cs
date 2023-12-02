@@ -1,5 +1,6 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SuperHeroApi.Data;
 using SuperHeroApi.Entities;
 
 namespace SuperHeroApi.Controllers
@@ -31,6 +32,35 @@ namespace SuperHeroApi.Controllers
                 return BadRequest();
             }
             return Ok(hero);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddHero(SuperHeroDto hero)
+        {
+            if(!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            var newHero = new SuperHero
+            {
+                Name = hero.Name,
+                FirstName = hero.FirstName,
+                LastName = hero.LastName,
+                Place = hero.Place
+            };
+
+            try
+            {
+                await _dataContext.SuperHeroes.AddAsync(newHero);
+                await _dataContext.SaveChangesAsync();
+                return Ok(newHero);
+            }
+
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
     }
 }
